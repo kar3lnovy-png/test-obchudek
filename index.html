@@ -10,10 +10,10 @@
 <body class="bg-blue-50 min-h-screen text-slate-800">
 
 <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm border border-blue-100">
+  <div class="bg-white rounded-3xl shadow-xl p-8 w-full max-w-sm border border-blue-100">
     <div class="text-center mb-6">
       <div class="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">C</div>
-      <h1 class="text-2xl font-bold text-blue-800">Charis Pokladna obchůdek</h1>
+      <h1 class="text-2xl font-bold text-blue-800">Charis Pokladna</h1>
       <p class="text-slate-500 text-sm mt-1">Zadej svůj PIN kód</p>
     </div>
 
@@ -44,17 +44,15 @@
 </div>
 
 <div id="pos-screen" class="hidden min-h-screen flex flex-col">
-
   <header class="bg-blue-700 text-white px-4 py-3 flex justify-between items-center shadow-md">
     <div>
-      <h1 class="font-bold text-lg">Charis Pokladna obchůdek</h1>
+      <h1 class="font-bold text-lg">Charis Pokladna</h1>
       <p class="text-blue-200 text-sm">Přihlášen: <span id="employee-name" class="font-semibold text-white"></span></p>
     </div>
-    <button id="logout-btn" class="bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded-lg text-sm transition">Odhlásit</button>
+    <button id="logout-btn" class="bg-blue-800 hover:bg-blue-900 px-3 py-2 rounded-lg text-sm font-semibold transition">Odhlásit</button>
   </header>
 
   <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
-
     <main class="flex-1 overflow-y-auto p-4">
       <div id="supplier-tabs" class="flex gap-2 mb-4 overflow-x-auto pb-2"></div>
       <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
@@ -76,7 +74,7 @@
           <button id="checkout-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed">
             Zaúčtovat přesně
           </button>
-          <button id="calc-checkout-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed">
+          <button id="calc-checkout-btn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md">
             Spočítat a zaúčtovat
           </button>
         </div>
@@ -85,67 +83,77 @@
   </div>
 </div>
 
-<div id="calc-overlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl p-5 text-center w-full max-w-sm mx-auto shadow-2xl flex flex-col max-h-[90vh]">
-    <h2 class="font-bold text-blue-800 text-xl mb-3 border-b border-blue-100 pb-2">Kalkulačka vrácení</h2>
-    
-    <div class="flex justify-between items-center mb-3 text-lg px-1">
-      <span class="text-slate-600">K úhradě:</span>
-      <span id="calc-total-display" class="font-bold text-blue-800 text-2xl">0 Kč</span>
+<div id="calc-screen" class="hidden min-h-screen bg-slate-100 flex flex-col">
+  <header class="bg-emerald-600 text-white px-4 py-3 flex justify-between items-center shadow-md">
+    <div>
+      <h1 class="font-bold text-lg">Výpočet vrácení</h1>
     </div>
+    <button id="calc-cancel-btn" class="bg-emerald-700 hover:bg-emerald-800 px-4 py-2 rounded-lg text-sm font-semibold transition">
+      Zpět k nákupu
+    </button>
+  </header>
 
-    <div id="calc-quick-amounts" class="flex gap-2 mb-3">
+  <main class="flex-1 flex flex-col items-center p-4 md:p-6 overflow-y-auto">
+    <div class="bg-white rounded-3xl p-6 md:p-8 text-center w-full max-w-md shadow-xl flex flex-col flex-1 max-h-[850px] border border-slate-200">
+      
+      <div class="flex justify-between items-center mb-6 text-xl px-2">
+        <span class="text-slate-500 font-semibold uppercase tracking-wider text-sm">K úhradě</span>
+        <span id="calc-total-display" class="font-black text-blue-800 text-3xl">0 Kč</span>
       </div>
 
-    <div class="mb-3 text-left">
-      <div class="relative">
-        <input type="text" id="calc-received-input" readonly class="w-full text-2xl p-3 border border-slate-300 rounded-xl text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-bold bg-slate-50 cursor-default" placeholder="Zadej částku">
-        <span class="absolute right-4 top-3.5 text-slate-400 font-bold text-xl">Kč</span>
+      <div id="calc-quick-amounts" class="flex gap-2 mb-6">
+        </div>
+
+      <div class="mb-6 text-left">
+        <div class="relative">
+          <input type="text" id="calc-received-input" readonly class="w-full text-4xl p-4 border-2 border-slate-200 rounded-2xl text-center focus:border-emerald-500 outline-none font-bold bg-slate-50 text-slate-800 shadow-inner" placeholder="0">
+          <span class="absolute right-5 top-5 text-slate-400 font-bold text-2xl">Kč</span>
+        </div>
       </div>
-    </div>
 
-    <div class="grid grid-cols-3 gap-2 mb-4">
-      <button class="calc-numpad-btn" data-num="1">1</button>
-      <button class="calc-numpad-btn" data-num="2">2</button>
-      <button class="calc-numpad-btn" data-num="3">3</button>
-      <button class="calc-numpad-btn" data-num="4">4</button>
-      <button class="calc-numpad-btn" data-num="5">5</button>
-      <button class="calc-numpad-btn" data-num="6">6</button>
-      <button class="calc-numpad-btn" data-num="7">7</button>
-      <button class="calc-numpad-btn" data-num="8">8</button>
-      <button class="calc-numpad-btn" data-num="9">9</button>
-      <button id="calc-numpad-clear" class="calc-numpad-btn bg-blue-100 text-blue-700">C</button>
-      <button class="calc-numpad-btn" data-num="0">0</button>
-      <button id="calc-numpad-back" class="calc-numpad-btn bg-blue-100 text-blue-700">⌫</button>
-    </div>
+      <div class="grid grid-cols-3 gap-3 mb-6 flex-1">
+        <button class="calc-numpad-btn" data-num="1">1</button>
+        <button class="calc-numpad-btn" data-num="2">2</button>
+        <button class="calc-numpad-btn" data-num="3">3</button>
+        <button class="calc-numpad-btn" data-num="4">4</button>
+        <button class="calc-numpad-btn" data-num="5">5</button>
+        <button class="calc-numpad-btn" data-num="6">6</button>
+        <button class="calc-numpad-btn" data-num="7">7</button>
+        <button class="calc-numpad-btn" data-num="8">8</button>
+        <button class="calc-numpad-btn" data-num="9">9</button>
+        <button id="calc-numpad-clear" class="calc-numpad-btn !bg-red-50 !text-red-600 hover:!bg-red-100">C</button>
+        <button class="calc-numpad-btn" data-num="0">0</button>
+        <button id="calc-numpad-back" class="calc-numpad-btn !bg-slate-100 !text-slate-600 hover:!bg-slate-200">⌫</button>
+      </div>
 
-    <div id="calc-result-box" class="flex justify-between items-center mb-4 text-xl bg-slate-50 p-3 rounded-xl border border-slate-200 transition-colors">
-      <span id="calc-result-label" class="font-semibold text-slate-700">Vrátit:</span>
-      <span id="calc-change-display" class="font-bold text-slate-500">0 Kč</span>
-    </div>
+      <div id="calc-result-box" class="flex justify-between items-center mb-6 text-2xl bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 transition-colors">
+        <span id="calc-result-label" class="font-semibold text-slate-600">Vrátit:</span>
+        <span id="calc-change-display" class="font-black text-slate-400 text-3xl">0 Kč</span>
+      </div>
 
-    <div class="flex gap-3 mt-auto">
-      <button id="calc-cancel-btn" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition">Zrušit</button>
-      <button id="calc-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed">Zaúčtovat</button>
+      <button id="calc-confirm-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 text-xl rounded-2xl transition shadow-lg disabled:opacity-40 disabled:cursor-not-allowed mt-auto">
+        Zaúčtovat a uzavřít
+      </button>
     </div>
-  </div>
+  </main>
 </div>
 
-<div id="overlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl p-8 text-center max-w-xs w-full mx-4">
+<div id="overlay" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl p-8 text-center max-w-xs w-full shadow-2xl">
     <div id="overlay-loading" class="hidden">
       <div class="spinner mx-auto mb-4"></div>
-      <p class="font-semibold text-slate-700">Zpracovávám prodej...</p>
+      <p class="font-semibold text-slate-700 text-lg">Zpracovávám...</p>
     </div>
     <div id="overlay-success" class="hidden">
-      <div class="text-5xl mb-3">✅</div>
-      <p class="font-bold text-blue-800 text-lg">Prodej zaznamenán!</p>
+      <div class="text-6xl mb-4">✅</div>
+      <p class="font-bold text-emerald-600 text-2xl mb-1">Hotovo!</p>
+      <p class="text-slate-500 font-medium">Prodej byl zaznamenán.</p>
     </div>
     <div id="overlay-error" class="hidden">
-      <div class="text-5xl mb-3">⚠️</div>
-      <p class="font-bold text-red-600 text-lg">Chyba při odesílání</p>
-      <p class="text-slate-500 text-sm mt-1">Zkontroluj připojení a zkus to znovu.</p>
-      <button id="overlay-close" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg">Zavřít</button>
+      <div class="text-6xl mb-4">⚠️</div>
+      <p class="font-bold text-red-600 text-xl">Chyba při odesílání</p>
+      <p class="text-slate-500 text-sm mt-2">Zkontroluj připojení k internetu a zkus to znovu.</p>
+      <button id="overlay-close" class="mt-6 w-full bg-slate-800 text-white font-bold py-3 rounded-xl">Zavřít</button>
     </div>
   </div>
 </div>
