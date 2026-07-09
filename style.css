@@ -23,11 +23,21 @@ button, .product-card, .supplier-tab {
 .pin-btn, .calc-numpad-btn {
   background: #eff6ff;
   color: #1e3a8a;
-  font-size: 1.5rem; /* Zvětšeno z 1.25 na 1.5 pro pohodlnější trefování na kalkulačce */
+  font-size: 1.5rem; 
   font-weight: 700;
-  padding: 1.1rem 0; /* Vyšší tlačítka pro dotyk */
   border-radius: 1rem;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+/* Pevná výška jen pro PIN */
+.pin-btn {
+  padding: 1.1rem 0; 
+}
+
+/* Flexibilní výška pro klávesnici kalkulačky */
+.calc-numpad-btn {
+  height: 100%;
+  min-height: 40px; 
 }
 
 .pin-btn:active, .calc-numpad-btn:active {
@@ -42,7 +52,7 @@ button, .product-card, .supplier-tab {
 }
 .quick-amount-btn:active {
   transform: scale(0.92);
-  background-color: #6ee7b7; /* Tmavší zelená při stisku */
+  background-color: #6ee7b7; 
   box-shadow: inset 0 3px 6px rgba(0,0,0,0.15);
 }
 
