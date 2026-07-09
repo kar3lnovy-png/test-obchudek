@@ -116,6 +116,8 @@ const calcCheckoutBtn = document.getElementById("calc-checkout-btn");
 const calcOverlay = document.getElementById("calc-overlay");
 const calcTotalDisplay = document.getElementById("calc-total-display");
 const calcReceivedInput = document.getElementById("calc-received-input");
+const calcResultBox = document.getElementById("calc-result-box");
+const calcResultLabel = document.getElementById("calc-result-label");
 const calcChangeDisplay = document.getElementById("calc-change-display");
 const calcCancelBtn = document.getElementById("calc-cancel-btn");
 const calcConfirmBtn = document.getElementById("calc-confirm-btn");
@@ -294,10 +296,12 @@ calcCheckoutBtn.addEventListener("click", () => {
   calcTotalDisplay.textContent = total + " Kč";
   calcReceivedInput.value = "";
   calcChangeDisplay.textContent = "0 Kč";
-  calcChangeDisplay.className = "font-bold text-slate-400"; // Reset barvy
+  calcResultLabel.textContent = "Vrátit:";
+  calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-slate-50 p-4 rounded-xl border border-slate-200 transition-colors";
+  calcChangeDisplay.className = "font-bold text-slate-500";
+  calcConfirmBtn.disabled = true; // Zamčeno, dokud nezadá peníze
   calcOverlay.classList.remove("hidden");
   
-  // Rychlý focus pro snadné zadávání hned po otevření
   setTimeout(() => calcReceivedInput.focus(), 100);
 });
 
@@ -307,17 +311,32 @@ calcCancelBtn.addEventListener("click", () => {
 
 calcReceivedInput.addEventListener("input", () => {
   const total = getCartTotal();
-  const received = parseFloat(calcReceivedInput.value) || 0;
+  const receivedStr = calcReceivedInput.value;
+  
+  if (!receivedStr) {
+    calcResultLabel.textContent = "Vrátit:";
+    calcChangeDisplay.textContent = "0 Kč";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-slate-50 p-4 rounded-xl border border-slate-200 transition-colors";
+    calcChangeDisplay.className = "font-bold text-slate-500";
+    calcConfirmBtn.disabled = true;
+    return;
+  }
+
+  const received = parseFloat(receivedStr) || 0;
   const change = received - total;
   
-  calcChangeDisplay.textContent = change + " Kč";
-  
   if (change < 0) {
-    calcChangeDisplay.className = "font-bold text-red-500";
-  } else if (change > 0) {
-    calcChangeDisplay.className = "font-bold text-emerald-600";
+    calcResultLabel.textContent = "Zbývá doplatit:";
+    calcChangeDisplay.textContent = Math.abs(change) + " Kč";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-red-50 p-4 rounded-xl border border-red-200 transition-colors";
+    calcChangeDisplay.className = "font-bold text-red-600";
+    calcConfirmBtn.disabled = true; // Málo peněz -> nelze zaúčtovat
   } else {
-    calcChangeDisplay.className = "font-bold text-slate-600";
+    calcResultLabel.textContent = "Vrátit:";
+    calcChangeDisplay.textContent = change + " Kč";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-emerald-50 p-4 rounded-xl border border-emerald-200 transition-colors";
+    calcChangeDisplay.className = "font-bold text-emerald-600";
+    calcConfirmBtn.disabled = false; // Dostatek peněz -> odemčeno
   }
 });
 
@@ -334,9 +353,7 @@ document.getElementById("overlay-close").addEventListener("click", () => {
 async function processCheckout() {
   if (cart.length === 0) return;
 
-  // Schovat kalkulačku, pokud je otevřená
   calcOverlay.classList.add("hidden");
-
   overlay.classList.remove("hidden");
   overlayLoading.classList.remove("hidden");
   overlaySuccess.classList.add("hidden");
@@ -378,6 +395,5 @@ async function processCheckout() {
   }
 }
 
-// Přiřazení na obě tlačítka pro zaúčtování
 checkoutBtn.addEventListener("click", processCheckout);
 calcConfirmBtn.addEventListener("click", processCheckout);
