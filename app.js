@@ -272,6 +272,7 @@ function renderCart() {
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   cartTotalEl.textContent = total + " Kč";
   checkoutBtn.disabled = cart.length === 0;
+  document.getElementById("calc-checkout-btn").disabled = cart.length === 0;
 }
 
 // =================== ZAÚČTOVÁNÍ ===================
