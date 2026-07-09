@@ -1,7 +1,6 @@
 // =================== KONFIGURACE ===================
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyB7Uf9V9knZRrB8m4jig1zgCL87y2GxBJa_xX8RMpLvufrWmYb1b49I8duUzErLJ37/exec";
 
-// Zaměstnanci a jejich PINy
 const EMPLOYEES = {
   "1001": "Centrální tablet",
   "1002": "Filip Dvořáček",
@@ -18,7 +17,6 @@ const EMPLOYEES = {
   "1013": "Jan Pelán"
 };
 
-// Produkty rozdělené podle dodavatelů
 const PRODUCTS = {
   "Charis": [
     { name: "Pohlednice Charis", price: 40 },
@@ -112,8 +110,8 @@ const cartTotalEl = document.getElementById("cart-total");
 const checkoutBtn = document.getElementById("checkout-btn");
 const calcCheckoutBtn = document.getElementById("calc-checkout-btn");
 
-// DOM Elementy Kalkulačky
-const calcOverlay = document.getElementById("calc-overlay");
+// DOM Elementy Nové Celostránkové Kalkulačky
+const calcScreen = document.getElementById("calc-screen");
 const calcTotalDisplay = document.getElementById("calc-total-display");
 const calcReceivedInput = document.getElementById("calc-received-input");
 const calcResultBox = document.getElementById("calc-result-box");
@@ -123,7 +121,7 @@ const calcCancelBtn = document.getElementById("calc-cancel-btn");
 const calcConfirmBtn = document.getElementById("calc-confirm-btn");
 const calcQuickAmountsEl = document.getElementById("calc-quick-amounts");
 
-// Aktivace okamžité odezvy na mobilech
+// Zrušení delaye na mobilech
 document.addEventListener("touchstart", function() {}, { passive: true });
 
 // =================== HAPTICKÁ ODEZVA ===================
@@ -291,29 +289,20 @@ function renderCart() {
   calcCheckoutBtn.disabled = isCartEmpty;
 }
 
-// =================== KALKULAČKA ===================
+// =================== CELOSTRÁNKOVÁ KALKULAČKA ===================
 
-// Logika pro vygenerování 3 nejpravděpodobnějších částek
 function getSuggestedAmounts(total) {
   let suggestions = new Set();
-  
-  // 1. Zaokrouhlení nahoru na nejbližší padesátikorunu (místo přesné částky)
   let nextFifty = Math.ceil(total / 50) * 50;
   suggestions.add(nextFifty);
 
-  // 2. Zaokrouhlení na nejbližší stovku
   let nextHundred = Math.ceil(total / 100) * 100;
-  suggestions.add(nextHundred); // Set vyfiltruje případné duplicity
+  suggestions.add(nextHundred); 
 
-  // 3. Typické bankovky od nejnižší k nejvyšší
   const banknotes = [200, 500, 1000, 2000, 5000];
   for (let note of banknotes) {
-    if (note > total) {
-      suggestions.add(note);
-    }
+    if (note > total) suggestions.add(note);
   }
-
-  // Vezmeme první 3 unikátní hodnoty
   return Array.from(suggestions).slice(0, 3);
 }
 
@@ -323,7 +312,7 @@ function renderQuickAmounts(total) {
   
   suggestions.forEach(amount => {
     const btn = document.createElement("button");
-    btn.className = "quick-amount-btn flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold py-2 rounded-xl border border-emerald-200 transition-colors text-lg";
+    btn.className = "quick-amount-btn flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold py-3 rounded-xl border border-emerald-200 transition-colors text-xl shadow-sm";
     btn.textContent = amount;
     btn.addEventListener("click", () => {
       calcReceivedInput.value = amount;
@@ -333,10 +322,9 @@ function renderQuickAmounts(total) {
   });
 }
 
-// Obsluha numpadu
 document.querySelectorAll(".calc-numpad-btn[data-num]").forEach(btn => {
   btn.addEventListener("click", () => {
-    if (calcReceivedInput.value.length < 8) { // Omezení délky vstupu
+    if (calcReceivedInput.value.length < 8) { 
       calcReceivedInput.value += btn.dataset.num;
       updateCalcDisplay();
     }
@@ -353,7 +341,6 @@ document.getElementById("calc-numpad-clear").addEventListener("click", () => {
   updateCalcDisplay();
 });
 
-// Hlavní aktualizace zobrazení kalkulačky (barvy, výpočet)
 function updateCalcDisplay() {
   const total = getCartTotal();
   const receivedStr = calcReceivedInput.value;
@@ -361,8 +348,8 @@ function updateCalcDisplay() {
   if (!receivedStr) {
     calcResultLabel.textContent = "Vrátit:";
     calcChangeDisplay.textContent = "0 Kč";
-    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-slate-50 p-3 rounded-xl border border-slate-200 transition-colors";
-    calcChangeDisplay.className = "font-bold text-slate-500";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-2xl bg-slate-50 p-5 rounded-2xl border-2 border-slate-100 transition-colors";
+    calcChangeDisplay.className = "font-black text-slate-400 text-3xl";
     calcConfirmBtn.disabled = true;
     return;
   }
@@ -373,32 +360,36 @@ function updateCalcDisplay() {
   if (change < 0) {
     calcResultLabel.textContent = "Zbývá doplatit:";
     calcChangeDisplay.textContent = Math.abs(change) + " Kč";
-    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-red-50 p-3 rounded-xl border border-red-200 transition-colors";
-    calcChangeDisplay.className = "font-bold text-red-600";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-2xl bg-red-50 p-5 rounded-2xl border-2 border-red-100 transition-colors";
+    calcChangeDisplay.className = "font-black text-red-600 text-3xl";
     calcConfirmBtn.disabled = true;
   } else {
     calcResultLabel.textContent = "Vrátit:";
     calcChangeDisplay.textContent = change + " Kč";
-    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-emerald-50 p-3 rounded-xl border border-emerald-200 transition-colors";
-    calcChangeDisplay.className = "font-bold text-emerald-600";
+    calcResultBox.className = "flex justify-between items-center mb-6 text-2xl bg-emerald-50 p-5 rounded-2xl border-2 border-emerald-100 transition-colors";
+    calcChangeDisplay.className = "font-black text-emerald-600 text-3xl";
     calcConfirmBtn.disabled = false;
   }
 }
 
-// Otevření okna kalkulačky
+// OTEVŘENÍ OBRAZOVKY KALKULAČKY
 calcCheckoutBtn.addEventListener("click", () => {
   const total = getCartTotal();
   calcTotalDisplay.textContent = total + " Kč";
   calcReceivedInput.value = "";
   
   renderQuickAmounts(total);
-  updateCalcDisplay(); // Nastaví výchozí stavy prázdného pole
+  updateCalcDisplay();
   
-  calcOverlay.classList.remove("hidden");
+  // Přepnutí obrazovek
+  posScreen.classList.add("hidden");
+  calcScreen.classList.remove("hidden");
 });
 
+// ZAVŘENÍ OBRAZOVKY KALKULAČKY (NÁVRAT K NÁKUPU)
 calcCancelBtn.addEventListener("click", () => {
-  calcOverlay.classList.add("hidden");
+  calcScreen.classList.add("hidden");
+  posScreen.classList.remove("hidden");
 });
 
 // =================== ZAÚČTOVÁNÍ ===================
@@ -414,7 +405,7 @@ document.getElementById("overlay-close").addEventListener("click", () => {
 async function processCheckout() {
   if (cart.length === 0) return;
 
-  calcOverlay.classList.add("hidden");
+  // Modální okno načítání se překryje přes aktivní obrazovku
   overlay.classList.remove("hidden");
   overlayLoading.classList.remove("hidden");
   overlaySuccess.classList.add("hidden");
@@ -442,12 +433,16 @@ async function processCheckout() {
 
     overlayLoading.classList.add("hidden");
     overlaySuccess.classList.remove("hidden");
+    
+    // Vyčištění a návrat do POSu na pozadí
     cart = [];
     renderCart();
+    calcScreen.classList.add("hidden");
+    posScreen.classList.remove("hidden");
 
     setTimeout(() => {
       overlay.classList.add("hidden");
-    }, 1500);
+    }, 1800); // Nechal jsem zprávu o něco déle, ať si prodejce všimne úspěchu
 
   } catch (err) {
     console.error(err);
