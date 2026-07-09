@@ -95,7 +95,7 @@ const PRODUCTS = {
 // =================== STAV APLIKACE ===================
 let enteredPin = "";
 let currentEmployee = null;
-let cart = []; // { supplier, name, price, qty }
+let cart = []; 
 let activeSupplier = Object.keys(PRODUCTS)[0];
 
 // =================== DOM ELEMENTY ===================
@@ -121,13 +121,14 @@ const calcResultLabel = document.getElementById("calc-result-label");
 const calcChangeDisplay = document.getElementById("calc-change-display");
 const calcCancelBtn = document.getElementById("calc-cancel-btn");
 const calcConfirmBtn = document.getElementById("calc-confirm-btn");
+const calcQuickAmountsEl = document.getElementById("calc-quick-amounts");
 
-// Aktivace okamžité odezvy (:active stavu) na mobilech
+// Aktivace okamžité odezvy na mobilech
 document.addEventListener("touchstart", function() {}, { passive: true });
 
 // =================== HAPTICKÁ ODEZVA ===================
 document.addEventListener('click', (e) => {
-  const isClickable = e.target.closest('.pin-btn, .supplier-tab, .product-card, button');
+  const isClickable = e.target.closest('.pin-btn, .supplier-tab, .product-card, button, .calc-numpad-btn, .quick-amount-btn');
   if (isClickable && navigator.vibrate) {
     navigator.vibrate(40); 
   }
@@ -291,53 +292,113 @@ function renderCart() {
 }
 
 // =================== KALKULAČKA ===================
-calcCheckoutBtn.addEventListener("click", () => {
-  const total = getCartTotal();
-  calcTotalDisplay.textContent = total + " Kč";
-  calcReceivedInput.value = "";
-  calcChangeDisplay.textContent = "0 Kč";
-  calcResultLabel.textContent = "Vrátit:";
-  calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-slate-50 p-4 rounded-xl border border-slate-200 transition-colors";
-  calcChangeDisplay.className = "font-bold text-slate-500";
-  calcConfirmBtn.disabled = true; // Zamčeno, dokud nezadá peníze
-  calcOverlay.classList.remove("hidden");
+
+// Logika pro vygenerování 3 nejpravděpodobnějších částek
+function getSuggestedAmounts(total) {
+  let suggestions = new Set();
   
-  setTimeout(() => calcReceivedInput.focus(), 100);
+  // 1. Zaokrouhlení nahoru na nejbližší padesátikorunu (místo přesné částky)
+  let nextFifty = Math.ceil(total / 50) * 50;
+  suggestions.add(nextFifty);
+
+  // 2. Zaokrouhlení na nejbližší stovku
+  let nextHundred = Math.ceil(total / 100) * 100;
+  suggestions.add(nextHundred); // Set vyfiltruje případné duplicity
+
+  // 3. Typické bankovky od nejnižší k nejvyšší
+  const banknotes = [200, 500, 1000, 2000, 5000];
+  for (let note of banknotes) {
+    if (note > total) {
+      suggestions.add(note);
+    }
+  }
+
+  // Vezmeme první 3 unikátní hodnoty
+  return Array.from(suggestions).slice(0, 3);
+}
+
+function renderQuickAmounts(total) {
+  calcQuickAmountsEl.innerHTML = "";
+  const suggestions = getSuggestedAmounts(total);
+  
+  suggestions.forEach(amount => {
+    const btn = document.createElement("button");
+    btn.className = "quick-amount-btn flex-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold py-2 rounded-xl border border-emerald-200 transition-colors text-lg";
+    btn.textContent = amount;
+    btn.addEventListener("click", () => {
+      calcReceivedInput.value = amount;
+      updateCalcDisplay();
+    });
+    calcQuickAmountsEl.appendChild(btn);
+  });
+}
+
+// Obsluha numpadu
+document.querySelectorAll(".calc-numpad-btn[data-num]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (calcReceivedInput.value.length < 8) { // Omezení délky vstupu
+      calcReceivedInput.value += btn.dataset.num;
+      updateCalcDisplay();
+    }
+  });
 });
 
-calcCancelBtn.addEventListener("click", () => {
-  calcOverlay.classList.add("hidden");
+document.getElementById("calc-numpad-back").addEventListener("click", () => {
+  calcReceivedInput.value = calcReceivedInput.value.slice(0, -1);
+  updateCalcDisplay();
 });
 
-calcReceivedInput.addEventListener("input", () => {
+document.getElementById("calc-numpad-clear").addEventListener("click", () => {
+  calcReceivedInput.value = "";
+  updateCalcDisplay();
+});
+
+// Hlavní aktualizace zobrazení kalkulačky (barvy, výpočet)
+function updateCalcDisplay() {
   const total = getCartTotal();
   const receivedStr = calcReceivedInput.value;
   
   if (!receivedStr) {
     calcResultLabel.textContent = "Vrátit:";
     calcChangeDisplay.textContent = "0 Kč";
-    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-slate-50 p-4 rounded-xl border border-slate-200 transition-colors";
+    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-slate-50 p-3 rounded-xl border border-slate-200 transition-colors";
     calcChangeDisplay.className = "font-bold text-slate-500";
     calcConfirmBtn.disabled = true;
     return;
   }
 
-  const received = parseFloat(receivedStr) || 0;
+  const received = parseInt(receivedStr, 10) || 0;
   const change = received - total;
   
   if (change < 0) {
     calcResultLabel.textContent = "Zbývá doplatit:";
     calcChangeDisplay.textContent = Math.abs(change) + " Kč";
-    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-red-50 p-4 rounded-xl border border-red-200 transition-colors";
+    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-red-50 p-3 rounded-xl border border-red-200 transition-colors";
     calcChangeDisplay.className = "font-bold text-red-600";
-    calcConfirmBtn.disabled = true; // Málo peněz -> nelze zaúčtovat
+    calcConfirmBtn.disabled = true;
   } else {
     calcResultLabel.textContent = "Vrátit:";
     calcChangeDisplay.textContent = change + " Kč";
-    calcResultBox.className = "flex justify-between items-center mb-6 text-xl bg-emerald-50 p-4 rounded-xl border border-emerald-200 transition-colors";
+    calcResultBox.className = "flex justify-between items-center mb-4 text-xl bg-emerald-50 p-3 rounded-xl border border-emerald-200 transition-colors";
     calcChangeDisplay.className = "font-bold text-emerald-600";
-    calcConfirmBtn.disabled = false; // Dostatek peněz -> odemčeno
+    calcConfirmBtn.disabled = false;
   }
+}
+
+// Otevření okna kalkulačky
+calcCheckoutBtn.addEventListener("click", () => {
+  const total = getCartTotal();
+  calcTotalDisplay.textContent = total + " Kč";
+  calcReceivedInput.value = "";
+  
+  renderQuickAmounts(total);
+  updateCalcDisplay(); // Nastaví výchozí stavy prázdného pole
+  
+  calcOverlay.classList.remove("hidden");
+});
+
+calcCancelBtn.addEventListener("click", () => {
+  calcOverlay.classList.add("hidden");
 });
 
 // =================== ZAÚČTOVÁNÍ ===================
