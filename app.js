@@ -273,12 +273,13 @@ function renderCart() {
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   cartTotalEl.textContent = total + " Kč";
   
-  checkoutBtn.disabled = cart.length === 0;
+  // Vypínání tlačítek, pokud je košík prázdný
+  const isCartEmpty = cart.length === 0;
+  checkoutBtn.disabled = isCartEmpty;
   
-  // Bezpečnější zapnutí/vypnutí nového tlačítka
   const calcBtnEl = document.getElementById("calc-checkout-btn");
   if (calcBtnEl) {
-    calcBtnEl.disabled = cart.length === 0;
+    calcBtnEl.disabled = isCartEmpty;
   }
 }
 
@@ -338,42 +339,73 @@ checkoutBtn.addEventListener("click", async () => {
   }
 });
 
-// =================== JEDNODUCHÁ KALKULAČKA ===================
+// =================== INTEGROVANÁ KALKULAČKA ===================
 const calcCheckoutBtn = document.getElementById("calc-checkout-btn");
+const calcSection = document.getElementById("calc-section");
+const calcReceived = document.getElementById("calc-received");
+const calcReturn = document.getElementById("calc-return");
+const calcCancel = document.getElementById("calc-cancel");
+const calcConfirm = document.getElementById("calc-confirm");
 
-if (calcCheckoutBtn) {
+if (calcCheckoutBtn && calcSection && calcReceived && calcReturn && calcCancel && calcConfirm) {
+  let cartTotalAmount = 0;
+
+  // Spuštění kalkulačky
   calcCheckoutBtn.addEventListener("click", () => {
-    if (cart.length === 0) return;
+    cartTotalAmount = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    if (cartTotalAmount === 0) return;
 
-    // Spočítáme aktuální cenu košíku
-    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    // Skryjeme původní tlačítka, ukážeme kalkulačku
+    checkoutBtn.classList.add("hidden");
+    calcCheckoutBtn.classList.add("hidden");
+    calcSection.classList.remove("hidden");
 
-    // Vykopne jednoduché okno prohlížeče pro zadání částky
-    const receivedStr = prompt(`K úhradě: ${total} Kč\n\nKolik peněz prodejce přijal od zákazníka (Kč)?`);
+    // Reset stavu
+    calcReceived.value = "";
+    calcReturn.textContent = "0 Kč";
+    calcReturn.className = "text-xl font-bold text-slate-400";
+    calcConfirm.disabled = true;
 
-    // Pokud prodejce klikne na Zrušit, nebo nezadá nic a potvrdí
-    if (receivedStr === null || receivedStr.trim() === "") return;
-
-    const received = parseInt(receivedStr);
-
-    // Kontrola, jestli nezadal nesmysl nebo málo peněz
-    if (isNaN(received) || received < total) {
-      alert("Chyba: Zadána neplatná částka nebo málo peněz!");
-      return;
-    }
-
-    // Výpočet vrácení
-    const returnAmt = received - total;
-
-    // Ukáže výsledek a rovnou se zeptá na zaúčtování
-    const confirmCheckout = confirm(`Vrátit zákazníkovi: ${returnAmt} Kč\n\nMám nákup rovnou zaúčtovat?`);
-
-    if (confirmCheckout) {
-      // Simulujeme kliknutí na tvé původní tlačítko "Zaúčtovat", 
-      // takže se spustí tvůj už hotový odesílací proces s loading kolečkem.
-      document.getElementById("checkout-btn").click();
-    }
+    // Automatický focus do pole pro okamžité psaní na mobilu
+    setTimeout(() => calcReceived.focus(), 80);
   });
-} else {
-  console.error("Pozor: V index.html chybí tlačítko s id='calc-checkout-btn'!");
+
+  // Reaktivní výpočet při psaní částky
+  function calculateReturn() {
+    const received = parseInt(calcReceived.value) || 0;
+    const change = received - cartTotalAmount;
+
+    if (calcReceived.value.trim() === "") {
+      calcReturn.textContent = "0 Kč";
+      calcReturn.className = "text-xl font-bold text-slate-400";
+      calcConfirm.disabled = true;
+    } else if (change >= 0) {
+      calcReturn.textContent = change + " Kč";
+      calcReturn.className = "text-xl font-bold text-green-600";
+      calcConfirm.disabled = false; // Povolíme dokončení prodeje
+    } else {
+      calcReturn.textContent = "Málo peněz";
+      calcReturn.className = "text-xl font-bold text-red-500";
+      calcConfirm.disabled = true;
+    }
+  }
+
+  calcReceived.addEventListener("input", calculateReturn);
+
+  // Tlačítko Zpět (návrat k běžnému košíku)
+  calcCancel.addEventListener("click", () => {
+    calcSection.classList.add("hidden");
+    checkoutBtn.classList.remove("hidden");
+    calcCheckoutBtn.classList.remove("hidden");
+  });
+
+  // Tlačítko Dokončit (vyvolá tvé stávající zaúčtování s loading oknem)
+  calcConfirm.addEventListener("click", () => {
+    calcSection.classList.add("hidden");
+    checkoutBtn.classList.remove("hidden");
+    calcCheckoutBtn.classList.remove("hidden");
+    
+    // Programově klikneme na skrytý checkoutBtn, spustí se tvůj hotový AJAX/Fetch
+    checkoutBtn.click();
+  });
 }
