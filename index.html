@@ -86,27 +86,30 @@
 </div>
 
 <div id="calc-overlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl p-6 text-center max-w-sm w-full mx-4">
+  <div class="bg-white rounded-2xl p-6 text-center max-w-sm w-full mx-4 shadow-2xl">
     <h2 class="font-bold text-blue-800 text-xl mb-4 border-b border-blue-100 pb-2">Kalkulačka vrácení</h2>
     
-    <div class="flex justify-between items-center mb-4 text-lg">
+    <div class="flex justify-between items-center mb-4 text-lg px-1">
       <span class="text-slate-600">K úhradě:</span>
-      <span id="calc-total-display" class="font-bold text-blue-800">0 Kč</span>
+      <span id="calc-total-display" class="font-bold text-blue-800 text-2xl">0 Kč</span>
     </div>
 
     <div class="mb-4 text-left">
-      <label class="block text-sm font-semibold text-slate-600 mb-1">Přijatá hotovost (Kč):</label>
-      <input type="number" id="calc-received-input" class="w-full text-2xl p-3 border rounded-xl text-center focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0">
+      <label class="block text-sm font-semibold text-slate-600 mb-1">Přijatá hotovost:</label>
+      <div class="relative">
+        <input type="number" id="calc-received-input" class="w-full text-2xl p-3 border border-slate-300 rounded-xl text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-bold" placeholder="0" min="0">
+        <span class="absolute right-4 top-3.5 text-slate-400 font-bold text-xl">Kč</span>
+      </div>
     </div>
 
-    <div class="flex justify-between items-center mb-6 text-xl bg-blue-50 p-4 rounded-xl border border-blue-100">
-      <span class="font-semibold text-slate-700">Vrátit:</span>
-      <span id="calc-change-display" class="font-bold text-slate-400">0 Kč</span>
+    <div id="calc-result-box" class="flex justify-between items-center mb-6 text-xl bg-slate-50 p-4 rounded-xl border border-slate-200 transition-colors">
+      <span id="calc-result-label" class="font-semibold text-slate-700">Vrátit:</span>
+      <span id="calc-change-display" class="font-bold text-slate-500">0 Kč</span>
     </div>
 
     <div class="flex gap-3">
-      <button id="calc-cancel-btn" class="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition">Zrušit</button>
-      <button id="calc-confirm-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl transition">Zaúčtovat</button>
+      <button id="calc-cancel-btn" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition">Zrušit</button>
+      <button id="calc-confirm-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed">Zaúčtovat</button>
     </div>
   </div>
 </div>
