@@ -124,6 +124,7 @@ document.addEventListener('click', (e) => {
     navigator.vibrate(40); 
   }
 });
+
 // =================== PIN LOGIN ===================
 document.querySelectorAll(".pin-btn[data-num]").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -271,8 +272,14 @@ function renderCart() {
 
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   cartTotalEl.textContent = total + " Kč";
+  
   checkoutBtn.disabled = cart.length === 0;
-  document.getElementById("calc-checkout-btn").disabled = cart.length === 0;
+  
+  // Bezpečnější zapnutí/vypnutí nového tlačítka
+  const calcBtnEl = document.getElementById("calc-checkout-btn");
+  if (calcBtnEl) {
+    calcBtnEl.disabled = cart.length === 0;
+  }
 }
 
 // =================== ZAÚČTOVÁNÍ ===================
@@ -330,38 +337,43 @@ checkoutBtn.addEventListener("click", async () => {
     overlayError.classList.remove("hidden");
   }
 });
+
 // =================== JEDNODUCHÁ KALKULAČKA ===================
 const calcCheckoutBtn = document.getElementById("calc-checkout-btn");
 
-calcCheckoutBtn.addEventListener("click", () => {
-  if (cart.length === 0) return;
+if (calcCheckoutBtn) {
+  calcCheckoutBtn.addEventListener("click", () => {
+    if (cart.length === 0) return;
 
-  // Spočítáme aktuální cenu košíku
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    // Spočítáme aktuální cenu košíku
+    const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  // Vykopne jednoduché okno prohlížeče pro zadání částky
-  const receivedStr = prompt(`K úhradě: ${total} Kč\n\nKolik peněz prodejce přijal od zákazníka (Kč)?`);
+    // Vykopne jednoduché okno prohlížeče pro zadání částky
+    const receivedStr = prompt(`K úhradě: ${total} Kč\n\nKolik peněz prodejce přijal od zákazníka (Kč)?`);
 
-  // Pokud prodejce klikne na Zrušit
-  if (receivedStr === null) return;
+    // Pokud prodejce klikne na Zrušit, nebo nezadá nic a potvrdí
+    if (receivedStr === null || receivedStr.trim() === "") return;
 
-  const received = parseInt(receivedStr);
+    const received = parseInt(receivedStr);
 
-  // Kontrola, jestli nezadal nesmysl nebo málo peněz
-  if (isNaN(received) || received < total) {
-    alert("Chyba: Zadána neplatná částka nebo málo peněz!");
-    return;
-  }
+    // Kontrola, jestli nezadal nesmysl nebo málo peněz
+    if (isNaN(received) || received < total) {
+      alert("Chyba: Zadána neplatná částka nebo málo peněz!");
+      return;
+    }
 
-  // Výpočet vrácení
-  const returnAmt = received - total;
+    // Výpočet vrácení
+    const returnAmt = received - total;
 
-  // Ukáže výsledek a rovnou se zeptá na zaúčtování
-  const confirmCheckout = confirm(`Vrátit zákazníkovi: ${returnAmt} Kč\n\nMám nákup rovnou zaúčtovat?`);
+    // Ukáže výsledek a rovnou se zeptá na zaúčtování
+    const confirmCheckout = confirm(`Vrátit zákazníkovi: ${returnAmt} Kč\n\nMám nákup rovnou zaúčtovat?`);
 
-  if (confirmCheckout) {
-    // Simulujeme kliknutí na tvé původní tlačítko "Zaúčtovat", 
-    // takže se spustí tvůj už hotový odesílací proces s loading kolečkem.
-    document.getElementById("checkout-btn").click();
-  }
-});
+    if (confirmCheckout) {
+      // Simulujeme kliknutí na tvé původní tlačítko "Zaúčtovat", 
+      // takže se spustí tvůj už hotový odesílací proces s loading kolečkem.
+      document.getElementById("checkout-btn").click();
+    }
+  });
+} else {
+  console.error("Pozor: V index.html chybí tlačítko s id='calc-checkout-btn'!");
+}
