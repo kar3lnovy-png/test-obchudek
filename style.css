@@ -3,7 +3,9 @@ button,
 .pin-btn, 
 .supplier-tab, 
 .product-card, 
-.qty-btn {
+.qty-btn,
+.calc-numpad-btn,
+.quick-amount-btn {
   /* Zruší 300ms zpoždění při kliknutí na mobilu */
   touch-action: manipulation;
   /* Odstraní výchozí šedé probliknutí na telefonech */
@@ -19,37 +21,57 @@ button, .product-card, .supplier-tab {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* --- PIN tlačítka --- */
-.pin-btn:active {
-  transform: scale(0.92); /* Výraznější zmenšení */
-  background: #bfdbfe !important; /* Ztmavnutí pozadí tlačítka */
-  box-shadow: inset 0 3px 6px rgba(0,0,0,0.15); /* Vnitřní stín simuluje zamáčknutí */
+/* --- Tlačítka (PIN a Kalkulačka) --- */
+.pin-btn, .calc-numpad-btn {
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 0.9rem 0;
+  border-radius: 0.75rem;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.pin-btn:active, .calc-numpad-btn:active {
+  transform: scale(0.92);
+  background: #bfdbfe !important; 
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.15); 
+}
+
+/* Rychlá volba bankovek */
+.quick-amount-btn {
+  transition: transform 0.1s, background-color 0.15s;
+}
+.quick-amount-btn:active {
+  transform: scale(0.92);
+  background-color: #a7f3d0; /* Tmavší zelená při stisku */
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* --- Karty produktů --- */
 .product-card:active {
   transform: scale(0.95);
-  background-color: #f1f5f9; /* Ztmavnutí pozadí karty */
-  border-color: #94a3b8; /* Zvýraznění okraje */
+  background-color: #f1f5f9; 
+  border-color: #94a3b8; 
 }
 
 /* --- Taby dodavatelů --- */
 .supplier-tab:active {
   transform: scale(0.95);
-  filter: brightness(0.85); /* Univerzální rychlé ztmavení pro taby */
+  filter: brightness(0.85); 
 }
 
 /* --- Tlačítka v košíku (+ a -) --- */
 .qty-btn:active { 
-  background: #93c5fd; /* Tmavší modrá při stisku */
+  background: #93c5fd; 
   transform: scale(0.9);
 }
 
 /* --- Hlavní tlačítko "Zaúčtovat" --- */
 #checkout-btn:active:not(:disabled) {
   transform: scale(0.97);
-  background-color: #1d4ed8; /* Výraznější tmavě modrá */
-  box-shadow: inset 0 4px 8px rgba(0,0,0,0.25); /* Hluboký stín zamáčknutí */
+  background-color: #1d4ed8; 
+  box-shadow: inset 0 4px 8px rgba(0,0,0,0.25); 
 }
 
 /* PIN dots */
@@ -64,21 +86,6 @@ button, .product-card, .supplier-tab {
 .pin-dot.filled {
   background: #2563eb;
   border-color: #2563eb;
-}
-
-/* PIN keypad buttons */
-.pin-btn {
-  background: #eff6ff;
-  color: #1e3a8a;
-  font-size: 1.25rem;
-  font-weight: 600;
-  padding: 0.9rem 0;
-  border-radius: 0.75rem;
-  transition: background 0.15s, transform 0.1s;
-}
-.pin-btn:active {
-  transform: scale(0.95);
-  background: #dbeafe;
 }
 
 /* Supplier tabs */
