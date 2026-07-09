@@ -330,3 +330,38 @@ checkoutBtn.addEventListener("click", async () => {
     overlayError.classList.remove("hidden");
   }
 });
+// =================== JEDNODUCHÁ KALKULAČKA ===================
+const calcCheckoutBtn = document.getElementById("calc-checkout-btn");
+
+calcCheckoutBtn.addEventListener("click", () => {
+  if (cart.length === 0) return;
+
+  // Spočítáme aktuální cenu košíku
+  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  // Vykopne jednoduché okno prohlížeče pro zadání částky
+  const receivedStr = prompt(`K úhradě: ${total} Kč\n\nKolik peněz prodejce přijal od zákazníka (Kč)?`);
+
+  // Pokud prodejce klikne na Zrušit
+  if (receivedStr === null) return;
+
+  const received = parseInt(receivedStr);
+
+  // Kontrola, jestli nezadal nesmysl nebo málo peněz
+  if (isNaN(received) || received < total) {
+    alert("Chyba: Zadána neplatná částka nebo málo peněz!");
+    return;
+  }
+
+  // Výpočet vrácení
+  const returnAmt = received - total;
+
+  // Ukáže výsledek a rovnou se zeptá na zaúčtování
+  const confirmCheckout = confirm(`Vrátit zákazníkovi: ${returnAmt} Kč\n\nMám nákup rovnou zaúčtovat?`);
+
+  if (confirmCheckout) {
+    // Simulujeme kliknutí na tvé původní tlačítko "Zaúčtovat", 
+    // takže se spustí tvůj už hotový odesílací proces s loading kolečkem.
+    document.getElementById("checkout-btn").click();
+  }
+});
